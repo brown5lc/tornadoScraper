@@ -1,44 +1,56 @@
+import os
+import tarfile
 import requests
+import gzip
+import shutil
 
-def construct_url(year, month, day, station_id, hour, minute, second=0):
-    base_url = "https://noaa-nexrad-level2.s3.amazonaws.com/"
+def construct_url(year, month, day, hour, minute, seconds, radar_code):
+    base_url = "https://noaa-nexrad-level2.s3.amazonaws.com"
     
-    # format year, month, day, hour, minute, and second to fit the URL format
-    year_str = str(year)
-    month_str = str(month).zfill(2)
-    day_str = str(day).zfill(2)
-    hour_str = str(hour).zfill(2)
-    minute_str = str(minute).zfill(2)
-    second_str = str(second).zfill(2)
-
-    # determine the file extension
-    if year < 2016 or (year == 2016 and month < 6):
-        file_ext = ".gz"
+    if year < 2016:
+        filename = f"{radar_code}{year}{month:02}{day:02}_{hour:02}{minute:02}{seconds:02}_V06.gz"
     else:
-        file_ext = ""
-
-    # for dates after 2015, we add "_V06" before the file extension
-    version = "_V06" if year > 2015 else ""
-
-    # construct the full URL
-    url = f"{base_url}{year_str}/{month_str}/{day_str}/{station_id}/{station_id}{year_str}{month_str}{day_str}_{hour_str}{minute_str}{second_str}{version}{file_ext}"
+        filename = f"{radar_code}{year}{month:02}{day:02}_{hour:02}{minute:02}{seconds:02}_V06"
     
-    return url
+    return f"{base_url}/{year}/{month:02}/{day:02}/{radar_code}/{filename}"
 
-def download_nexrad_data(year, month, day, station_id, hour, minute, second=0):
-    url = construct_url(year, month, day, station_id, hour, minute, second)
-    local_filename = url.split('/')[-1]
+def download_nexrad_data(year, month, day, hour, minute, seconds, radar_code, compressed_dir, uncompressed_dir):
+    url = construct_url(year, month, day, hour, minute, seconds, radar_code)
     
-    # Note: We're using 'requests' here, but in a real-world scenario, you might want to 
-    # add error handling or use a more robust method to download large files.
+    timestamp = f"{year}{month:02}{day:02}_{hour:02}{minute:02}{seconds:02}"
+    compressed_filename = f"{radar_code}{timestamp}_V06.gz" if year < 2016 else f"{radar_code}{timestamp}_V06"
+    
     response = requests.get(url, stream=True)
-    with open(local_filename, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=1024):
-            if chunk:  # Filter out keep-alive new chunks
-                f.write(chunk)
-                
-    print(f"Downloaded {url} to {local_filename}")
-    return local_filename
+    compressed_path = os.path.join(compressed_dir, compressed_filename)
+    
+    with open(compressed_path, 'wb') as fd:
+        for chunk in response.iter_content(chunk_size=128):
+            fd.write(chunk)
+    
+    uncompressed_path = os.path.join(uncompressed_dir, compressed_filename.rstrip('.gz'))
+    
+    # Adjusting extraction based on file extension
+    if year < 2016:
+        with gzip.open(compressed_path, 'rb') as f_in:
+            with open(uncompressed_path, 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+    else:
+        os.rename(compressed_path, uncompressed_path)
 
-# Test example
-download_nexrad_data(2015, 3, 3, 0, 10, 'KABX')
+    return uncompressed_path
+
+# Make sure to create directories if they don't exist
+compressed_dir = 'compressed_files'
+uncompressed_dir = 'uncompressed_files'
+
+if not os.path.exists(compressed_dir):
+    os.makedirs(compressed_dir)
+
+if not os.path.exists(uncompressed_dir):
+    os.makedirs(uncompressed_dir)
+
+# You can now use the function specifying the directories where you want the files
+# For example:
+download_nexrad_data(2015, 3, 3, 0, 10, 50, 'KABX', compressed_dir, uncompressed_dir)
+
+
