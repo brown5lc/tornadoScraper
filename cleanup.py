@@ -11,7 +11,7 @@ kdtree = KDTree(radar_points)
 # Load tornado data
 tornado_df = pd.read_csv('1950-2022_all_tornadoes.csv')
 
-# Filter out tornado data before a certain year, e.g., 2000
+# Filter out tornado data before a certain year, e.g., 2010
 filtered_data = tornado_df[tornado_df['yr'] >= 2010]
 
 # For each tornado location in the filtered_data, find the nearest radar station
