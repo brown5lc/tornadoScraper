@@ -2,9 +2,7 @@ import pandas as pd
 import cleanup  
 import download
 import visualize
-from download import main_download_proccess
 import datetime
-from download import compressed_dir, uncompressed_dir
 import os
 import sys
 import time
@@ -43,7 +41,6 @@ def delete_file(file_path):
 def main_process(debug = False, debug_idx = None):
     spinner_down = Spinner("Downloading data")
     spinner_vis = Spinner("Visualizing data")
-    spinner_down.start()
 
     # 1. Cleanup and Prepare enriched_tornado_data.csv
     cleanup.cleanup_tornado_data()
@@ -96,6 +93,7 @@ def main_process(debug = False, debug_idx = None):
 
         # 5a. List available files for the given day and radar station
         try:
+            spinner_down.start()
             downloaded_files = download.main_download_proccess(year, month, day, radar_code, start_time, end_time, download.compressed_dir, download.uncompressed_dir)
             spinner_down.stop()
             print(f"Data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} downloaded successfully!\n")
@@ -103,7 +101,8 @@ def main_process(debug = False, debug_idx = None):
 
             # 5d. Visualize each downloaded file
             for file_path in downloaded_files:
-                visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'])
+                print(f"Tornado Location: {row['slat']}, {row['slon']}")
+                visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'], False)
                 spinner_vis.stop()
                 print(f"Visualization for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} created successfully!\n")
                 delete_file(file_path)
