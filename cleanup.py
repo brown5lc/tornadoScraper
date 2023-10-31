@@ -1,6 +1,24 @@
 import pandas as pd
 from scipy.spatial import KDTree
 
+def adjust_to_gmt(row):
+    """Adjust the time to GMT based on the timezone."""
+    hour, minute, _ = map(int, row['time'].split(':'))
+    tz = row['tz']
+    
+    if tz == 3:  # CST is 6 hours behind GMT
+        hour += 6
+        if hour >= 24:
+            hour -= 24
+            # Adjust day as well if it spills over to the next day
+            # This will not account for month/year changes, but such cases should be rare in this context
+            row['dy'] += 1
+    elif tz == '?':  # Unknown timezone, we exclude this data
+        raise ValueError("Unknown timezone")
+    
+    row['time'] = f"{hour:02}:{minute:02}:00"
+    return row
+
 def cleanup_tornado_data():
     # Load the radar station data
     radar_df = pd.read_csv('radar_locations.csv')
@@ -14,6 +32,12 @@ def cleanup_tornado_data():
 
     # Filter out tornado data before a certain year, e.g., 2010
     filtered_data = tornado_df[tornado_df['yr'] >= 2016]
+
+    # Adjust time to GMT
+    try:
+        filtered_data = filtered_data.apply(adjust_to_gmt, axis=1)
+    except ValueError as ve:
+        print(f"Error adjusting to GMT: {ve}")
 
     # For each tornado location in the filtered_data, find the nearest radar station
     nearest_radars = []

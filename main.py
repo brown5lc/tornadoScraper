@@ -5,10 +5,8 @@ import visualize
 from download import main_download_proccess
 import datetime
 from download import compressed_dir, uncompressed_dir
-import logging
 import os
-
-logging.getLogger().setLevel(logging.ERROR)
+import sys
 
 def delete_file(file_path):
     try:
@@ -17,7 +15,7 @@ def delete_file(file_path):
         if e.errno != 2:
             raise
 
-def main_process():
+def main_process(debug = False, debug_idx = None):
     # 1. Cleanup and Prepare enriched_tornado_data.csv
     cleanup.cleanup_tornado_data()
     
@@ -25,26 +23,31 @@ def main_process():
     enriched_df = pd.read_csv('enriched_tornado_data.csv')
 
     # 3. Ask the user how they want the sampling to be
-    sampling_choice = input("Do you want the sampling to be random? (yes/no): ").strip().lower()
-    
-    if sampling_choice == 'no':
-        start_idx = int(input(f"Please enter the starting index (between 0 and {len(enriched_df)-1}): "))
+    if debug:
+        # Only use one sample for debugging purposes
+        enriched_df = enriched_df.iloc[[debug_idx]]
         
-        while start_idx < 0 or start_idx >= len(enriched_df):
-            print("Invalid index. Please try again.")
+    else:
+        sampling_choice = input("Do you want the sampling to be random? (yes/no): ").strip().lower()
+        
+        if sampling_choice == 'no':
             start_idx = int(input(f"Please enter the starting index (between 0 and {len(enriched_df)-1}): "))
             
-        enriched_df = enriched_df.iloc[start_idx:]
-    
-    # 4. Ask the user how many samples they'd like
-    sample_size = int(input("How many samples would you like to produce? "))
-    
-    while sample_size <= 0 or sample_size > len(enriched_df):
-        print(f"Invalid number of samples. Please enter a value between 1 and {len(enriched_df)}.")
+            while start_idx < 0 or start_idx >= len(enriched_df):
+                print("Invalid index. Please try again.")
+                start_idx = int(input(f"Please enter the starting index (between 0 and {len(enriched_df)-1}): "))
+                
+            enriched_df = enriched_df.iloc[start_idx:]
+        
+        # 4. Ask the user how many samples they'd like
         sample_size = int(input("How many samples would you like to produce? "))
+        
+        while sample_size <= 0 or sample_size > len(enriched_df):
+            print(f"Invalid number of samples. Please enter a value between 1 and {len(enriched_df)}.")
+            sample_size = int(input("How many samples would you like to produce? "))
 
-    if sampling_choice == 'yes':
-        enriched_df = enriched_df.sample(sample_size)
+        if sampling_choice == 'yes':
+            enriched_df = enriched_df.sample(sample_size)
 
     # 5. Download, decompress, and visualize each tornado radar data
     for _, row in enriched_df.iterrows():
@@ -75,5 +78,12 @@ def main_process():
             print(f"Error processing data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02}. Error: {e}")
 
 # Call the main process function
-main_process()
-
+if __name__ == "__main__":
+    if '--debug' in sys.argv:
+        try:
+            idx = int(sys.argv[sys.argv.index('--debug')+1])
+            main_process(debug=True, debug_idx=idx)
+        except (IndexError, ValueError):
+            print("Please specify the index for debug mode. Usage: --debug [index]")
+    else:
+        main_process()
