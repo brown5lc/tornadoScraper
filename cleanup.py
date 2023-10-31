@@ -31,7 +31,7 @@ def cleanup_tornado_data():
     tornado_df = pd.read_csv('1950-2022_all_tornadoes.csv')
 
     # Filter out tornado data before a certain year, e.g., 2010
-    filtered_data = tornado_df[tornado_df['yr'] >= 2016]
+    filtered_data = tornado_df[tornado_df['yr'] >= 2012]
 
     # Adjust time to GMT
     try:

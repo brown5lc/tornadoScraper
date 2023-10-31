@@ -1,3 +1,6 @@
+# Ignore everything in radar_images directory
+radar_images/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

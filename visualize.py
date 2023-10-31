@@ -1,8 +1,16 @@
 import os
+import sys
+
+backup = sys.stdout
+sys.stdout = open(os.devnull, 'w')
 import pyart
+
+sys.stdout = backup
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
+import warnings
+warnings.filterwarnings("ignore")
 
 def visualize_radar_data(filename, image_directory, tornado_lat, tornado_lon):
     """

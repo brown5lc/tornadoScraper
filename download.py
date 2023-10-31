@@ -46,6 +46,8 @@ def filter_files_based_on_time(files, start_time, end_time):
     """
     filtered_files = []
     for file in files:
+        if file.endswith('.tar'):  # Skip tar files
+            continue
         timestamp = extract_datetime_from_filename(file)
         if timestamp and start_time <= timestamp <= end_time:
             filtered_files.append(file)
@@ -88,7 +90,6 @@ def download_selected_files(files, bucket_name, compressed_dir, uncompressed_dir
 
 def main_download_proccess(year, month, day, radar_code, start_time, end_time, compressed_dir='compressed_files', uncompressed_dir='uncompressed_files'):
     # Ensure the output directories exist
-    print(f"Downloading data for {radar_code} on {year}-{month:02}-{day:02}...")
     try:
         if not os.path.exists(compressed_dir):
             os.makedirs(compressed_dir)

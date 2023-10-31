@@ -7,6 +7,31 @@ import datetime
 from download import compressed_dir, uncompressed_dir
 import os
 import sys
+import time
+import threading
+
+class Spinner:
+    def __init__(self, message="Working"):
+        self.spinner_cycle = ['-', '\\', '|', '/']
+        self.running = False
+        self.message = message
+
+    def start(self):
+        self.running = True
+        threading.Thread(target=self._spin).start()
+
+    def stop(self):
+        self.running = False
+
+    def _spin(self):
+        write, flush = sys.stdout.write, sys.stdout.flush
+        pos = 0
+        while self.running:
+            write(f'\r{self.message}... {self.spinner_cycle[pos]}')
+            flush()
+            time.sleep(0.1)
+            pos = (pos + 1) % 4
+        write('\r')  # Clear line
 
 def delete_file(file_path):
     try:
@@ -16,6 +41,10 @@ def delete_file(file_path):
             raise
 
 def main_process(debug = False, debug_idx = None):
+    spinner_down = Spinner("Downloading data")
+    spinner_vis = Spinner("Visualizing data")
+    spinner_down.start()
+
     # 1. Cleanup and Prepare enriched_tornado_data.csv
     cleanup.cleanup_tornado_data()
     
@@ -68,15 +97,21 @@ def main_process(debug = False, debug_idx = None):
         # 5a. List available files for the given day and radar station
         try:
             downloaded_files = download.main_download_proccess(year, month, day, radar_code, start_time, end_time, download.compressed_dir, download.uncompressed_dir)
+            spinner_down.stop()
+            print(f"Data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} downloaded successfully!\n")
+            spinner_vis.start()
 
             # 5d. Visualize each downloaded file
             for file_path in downloaded_files:
                 visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'])
+                spinner_vis.stop()
+                print(f"Visualization for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} created successfully!\n")
                 delete_file(file_path)
 
         except Exception as e:
             print(f"Error processing data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02}. Error: {e}")
 
+    
 # Call the main process function
 if __name__ == "__main__":
     if '--debug' in sys.argv:
