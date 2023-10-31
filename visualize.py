@@ -1,40 +1,45 @@
-import pyart
-import matplotlib.pyplot as plt
 import os
+import pyart
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
+import cartopy.feature as cfeature
 
-def create_directory(directory_path):
-    """Create directory if it doesn't exist."""
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
+def visualize_radar_data(filename, image_directory, tornado_lat, tornado_lon):
+    """
+    This function reads the radar data using pyart and creates a visualization for velocity.
+    It then saves this visualization to the specified image directory, focused on the tornado's location.
+    """
 
-def visualize_radar_data(file_path, output_directory):
-    # Ensure the output directory exists
-    create_directory(output_directory)
-    
-    # Create an output path for the image using the filename
-    output_img_path = os.path.join(output_directory, os.path.basename(file_path) + '.png')
-    
-    # 1. Read the radar data
-    radar = pyart.io.read_nexrad_archive(file_path)
-    
-    # 2. Display the velocity field
-    display = pyart.graph.RadarDisplay(radar)
-    fig = plt.figure(figsize=(10, 10))
-    display.plot('reflectivity', 0, title='Doppler Velocity', colorbar_label='', axislabels=('', 'North South distance from radar (km)'))
-    display.set_limits((-150, 150), (-150, 150))
-    
-    # 3. Save the display as an image
-    plt.savefig(output_img_path)
-    plt.close(fig)
+    try:
+        # Reading the radar data
+        radar = pyart.io.read_nexrad_archive(filename)
 
-# Directory to save the radar images
-image_directory = './radar_images'
+        # Check if the velocity field is present in the radar data
+        if 'velocity' not in radar.fields:
+            print(f"Error processing {filename}. Velocity data is missing.")
+            return
 
-# Path to your NEXRAD file
-file_path = './uncompressed_files/KABX20150303_001050_V06'  # Adjust as per your file
+        # Setting up file names for saving
+        base_filename = os.path.basename(filename).split('.')[0]
+        vel_image_name = f"{base_filename}_velocity.png"
 
-radar = pyart.io.read_nexrad_archive(file_path)
-print(radar.fields.keys())
-print(radar.fields['velocity']['data'])
+        # Plotting velocity with map overlay
+        display_map = pyart.graph.RadarMapDisplay(radar)
+        fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.PlateCarree()})
+        vmin, vmax = -30, 30
+        
+        # Set the extent around the tornado's location
+        ax.set_extent([tornado_lon - 1.5, tornado_lon + 1.5, tornado_lat - 1.5, tornado_lat + 1.5])
+        
+        display_map.plot_ppi_map('velocity', sweep=3, vmin=vmin, vmax=vmax, ax=ax, cmap=pyart.graph.cm.NWSVel)
+        ax.add_feature(cfeature.STATES.with_scale('10m'), edgecolor='black', linewidth=0.5)
+        plt.savefig(os.path.join(image_directory, vel_image_name))
+        plt.close()
 
-visualize_radar_data(file_path, image_directory)
+    except Exception as e:
+        print(f"Error processing {filename}. Error: {e}")
+
+# Adjust this if your directory is elsewhere
+image_directory = 'radar_images'
+if not os.path.exists(image_directory):
+    os.makedirs(image_directory)
