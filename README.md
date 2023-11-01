@@ -9,7 +9,7 @@
 ## Installation & Setup
 
 1. **Clone the Repository**:
-git clone https://github.com/YOUR_USERNAME/tornadoScraper.git
+- git clone https://github.com/YOUR_USERNAME/tornadoScraper.git
 
 2. **Set Up a Virtual Environment** (Recommended):
 Using a virtual environment is recommended to keep project dependencies isolated.
