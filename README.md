@@ -5,12 +5,11 @@
 ## Prerequisites
 
 - Python 3.x
-- (Any other system-level prerequisites like specific OS, database systems, etc.)
 
 ## Installation & Setup
 
 1. **Clone the Repository**:
-git clone https://github.com/YOUR_USERNAME/tornadoScraper.git
+git clone https://github.com/YOUR_USERNAME/tornadoScraper.git\
 cd tornadoScraper
 
 
@@ -57,4 +56,4 @@ If you'd like to contribute to the project, please follow the standard fork & pu
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
