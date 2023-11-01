@@ -29,7 +29,6 @@ python3 main.py [OPTIONS]
 - Option 1: Nothing. The program will promt you if you want the data selection to be random or not, after which it will ask you how many images you want to generate. All the processed images can be found in the `radar_images` directory. 
 
 - Option 2: `--debug` This is one of two debug modes. When this debug mode is used to run main, it must be followed by a number corresponding to a row in the `enriched_tornado_data.csv`. It will then proccess the data for that single event. This is useful for general debugging. 
-- ...
 
 ## Debugging
 `debug_mode` is disabled by default. To enable it call `visualize_radar_data` with the argument `True` in the 5th place. This can be seen on line `105` of the `main.py` file. 
