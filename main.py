@@ -102,9 +102,11 @@ def main_process(debug = False, debug_idx = None):
             # 5d. Visualize each downloaded file
             for file_path in downloaded_files:
                 print(f"Tornado Location: {row['slat']}, {row['slon']}")
-                visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'], False)
+                visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'], True)
                 spinner_vis.stop()
                 print(f"Visualization for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} created successfully!\n")
+                print(year, month, day, end_hour, end_minute, end_seconds)
+                end_time = datetime.datetime(year, month, day, end_hour, end_minute, end_seconds)
                 delete_file(file_path)
 
         except Exception as e:
@@ -116,8 +118,9 @@ if __name__ == "__main__":
     if '--debug' in sys.argv:
         try:
             idx = int(sys.argv[sys.argv.index('--debug')+1])
+            idx -= 2 # Adjust for the first 4 lines in enriched_tornado_data.csv 
             main_process(debug=True, debug_idx=idx)
         except (IndexError, ValueError):
             print("Please specify the index for debug mode. Usage: --debug [index]")
-    else:
+    else:    
         main_process()

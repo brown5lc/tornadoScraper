@@ -60,10 +60,10 @@ def visualize_radar_data(filename, image_directory, tornado_lat, tornado_lon, de
             print("Radar Base Location: ", radar.latitude['data'][0], radar.longitude['data'][0])
             ax.add_feature(cfeature.STATES.with_scale('10m'), edgecolor='black', linewidth=0.5)
             ax.gridlines(draw_labels=True)
+            ax.scatter(tornado_lon, tornado_lat, color='red', s=100)
         else:
             ax.axis('off')
 
-        ax.scatter(tornado_lon, tornado_lat, color='red', s=100)
 
         # Save the image
         plt.savefig(os.path.join(image_directory, vel_image_name), bbox_inches='tight', pad_inches=0)
