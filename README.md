@@ -9,18 +9,17 @@
 ## Installation & Setup
 
 1. **Clone the Repository**:
-    - git clone https://github.com/YOUR_USERNAME/tornadoScraper.git
+    - `git clone https://github.com/YOUR_USERNAME/tornadoScraper.git`
 
 2. **Set Up a Virtual Environment** (Recommended):
-Using a virtual environment is recommended to keep project dependencies isolated.
-
-python -m venv venv
-source venv/bin/activate # On Windows: venv\Scripts\activate
-
+    - Navigate to the repo directory `cd tornadoScraper`
+    - Using a virtual environment is recommended to keep project dependencies isolated.
+    - To create the environment: `python -m venv [yourEnvName]`
+    - To launch the environment in Linux: `source [yourEnvName]/bin/activate`
 
 3. **Install Dependencies**:
-
-pip install -r requirements.txt
+    - This repo contains a list of dependencies it needs to run, to install (prefferably in your virtual environment) run the following command.
+    - `pip install -r requirements.txt`
 
 ## Usage
 
