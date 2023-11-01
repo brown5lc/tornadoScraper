@@ -4,6 +4,9 @@ radar_images/*
 # Debug files
 list_files.py
 
+# Ignore virtual environment
+myEnv/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
