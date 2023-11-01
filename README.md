@@ -9,9 +9,7 @@
 ## Installation & Setup
 
 1. **Clone the Repository**:
-git clone https://github.com/YOUR_USERNAME/tornadoScraper.git\
-cd tornadoScraper
-
+git clone https://github.com/YOUR_USERNAME/tornadoScraper.git
 
 2. **Set Up a Virtual Environment** (Recommended):
 Using a virtual environment is recommended to keep project dependencies isolated.
@@ -24,31 +22,22 @@ source venv/bin/activate # On Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 
-
-4. (If applicable) **Configuration**:
-Describe any required configuration, like API keys, database setup, environment variables, etc.
-
-5. (If applicable) **Initial Data Setup**:
-Provide instructions if any initial data or database setup is required.
-
 ## Usage
 
-Describe the basic usage of the program. For example:
+python3 main.py [OPTIONS]
 
-python main.py [OPTIONS]
+- Option 1: Nothing. The program will promt you if you want the data selection to be random or not, after which it will ask you how many images you want to generate. All the processed images can be found in the `radar_images` directory. 
 
-
-- Option 1: Description of the option.
-- Option 2: Description of the option.
+- Option 2: `--debug` This is one of two debug modes. When this debug mode is used to run main, it must be followed by a number corresponding to a row in the `enriched_tornado_data.csv`. It will then proccess the data for that single event. This is useful for general debugging. 
 - ...
 
 ## Debugging
+`debug_mode` is disabled by default. To enable it call `visualize_radar_data` with the argument `True` in the 5th place. This can be seen on line `105` of the `main.py` file. 
 
-If `debug_mode` is enabled in the program, you'll receive detailed logs and information on:
+If `debug_mode` is enabled in the program, you'll receive detailed logs and more information on the radar visualization:
 - Radar Base Location
 - Tornado Location
 - X and Y Range for the visual data
-- ... (any other debug info)
 
 ## Contributing
 
