@@ -20,11 +20,12 @@
 3. **Install Dependencies**:
     - This repo contains a list of dependencies it needs to run, to install (prefferably in your virtual environment) run the following command.
     - `pip install -r requirements.txt`
+    - You may need to use `pip3.10` to install the requirements. 
 
 ## Usage
 To run this program navigate to the repo directory in the terminal and type the following command. 
 
-`python3 main.py [OPTIONS]`
+`python3.10 main.py [OPTIONS]`
 
 There are two options as to what can follow te command.
 
