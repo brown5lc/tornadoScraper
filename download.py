@@ -43,15 +43,18 @@ def extract_datetime_from_filename(filename):
 def filter_files_based_on_time(files, start_time, end_time):
     """
     Filters the list of files based on the tornado's start and end time.
+    Currently only returns the first file that matches the time range.
     """
-    filtered_files = []
+    # filtered_files = []
     for file in files:
         if file.endswith('.tar'):  # Skip tar files
             continue
         timestamp = extract_datetime_from_filename(file)
         if timestamp and start_time <= timestamp <= end_time:
-            filtered_files.append(file)
-    return filtered_files
+            # filtered_files.append(file)
+            return [file]
+    #return filtered_files
+    return []
 
 def download_selected_files(files, bucket_name, compressed_dir, uncompressed_dir):
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
