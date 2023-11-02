@@ -14,7 +14,7 @@
 2. **Set Up a Virtual Environment** (Recommended):
     - Navigate to the repo directory `cd tornadoScraper`
     - Using a virtual environment is recommended to keep project dependencies isolated.
-    - To create the environment: `python -m venv [yourEnvName]`
+    - To create the environment: `python3 -m venv [yourEnvName]`
     - To launch the environment in Linux: `source [yourEnvName]/bin/activate`
 
 3. **Install Dependencies**:
