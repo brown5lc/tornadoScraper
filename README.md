@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Python 3.x
+- Python 3.10.x
 
 ## Installation & Setup
 
