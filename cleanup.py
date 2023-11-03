@@ -63,6 +63,9 @@ def cleanup_tornado_data():
     # Add the nearest radar station ID to the filtered_data DataFrame
     filtered_data.loc[:, 'Nearest Radar Station'] = nearest_radars
 
+    # Filter out tornadoes with magnitude less than 1
+    filtered_data = filtered_data[filtered_data['mag'] > 1]
+
     # Save the enriched filtered_data to a new CSV
     filtered_data.to_csv('enriched_tornado_data.csv', index=False)
 
