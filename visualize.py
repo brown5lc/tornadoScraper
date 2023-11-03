@@ -39,7 +39,7 @@ def visualize_radar_data(filename, image_directory, tornado_lat, tornado_lon, de
         actual_lats = radar.latitude['data'][0] + lat_offset
 
         # Randomly offset the tornado's location by up to 25 miles
-        max_offset_miles = 25
+        max_offset_miles = 20
         lat_offset_degrees = max_offset_miles / 69.0
         lon_offset_degrees = max_offset_miles / (69.0 * np.cos(np.radians(tornado_lat)))
 

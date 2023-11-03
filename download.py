@@ -40,7 +40,7 @@ def extract_datetime_from_filename(filename):
     return datetime(year, month, day, hour, minute, second)
 
     
-def filter_files_based_on_time(files, start_time, end_time):
+def filter_files_based_on_time(files, start_time):
     """
     Filters the list of files based on the tornado's start and end time.
     Currently only returns the first file that matches the time range.
@@ -50,7 +50,7 @@ def filter_files_based_on_time(files, start_time, end_time):
         if file.endswith('.tar'):  # Skip tar files
             continue
         timestamp = extract_datetime_from_filename(file)
-        if timestamp and start_time <= timestamp <= end_time:
+        if timestamp and start_time <= timestamp:
             # filtered_files.append(file)
             return [file]
     #return filtered_files
@@ -91,7 +91,7 @@ def download_selected_files(files, bucket_name, compressed_dir, uncompressed_dir
 
     return downloaded_files_list
 
-def main_download_proccess(year, month, day, radar_code, start_time, end_time, compressed_dir='compressed_files', uncompressed_dir='uncompressed_files'):
+def main_download_proccess(year, month, day, radar_code, start_time, compressed_dir='compressed_files', uncompressed_dir='uncompressed_files'):
     # Ensure the output directories exist
     try:
         if not os.path.exists(compressed_dir):
@@ -110,7 +110,7 @@ def main_download_proccess(year, month, day, radar_code, start_time, end_time, c
         print(f"No files found for {radar_code} on {year}-{month:02}-{day:02}.")
         return []
     
-    selected_files = filter_files_based_on_time(files, start_time, end_time)
+    selected_files = filter_files_based_on_time(files, start_time)
 
     downloaded_files = download_selected_files(selected_files, bucket_name, compressed_dir, uncompressed_dir)
 
