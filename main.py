@@ -89,7 +89,6 @@ def main_process(debug = False, debug_idx = None):
             end_hour += 1
             end_minute -= 60
 
-        print(year, month, day, end_hour, end_minute, end_seconds)
         end_time = datetime.datetime(year, month, day, end_hour, end_minute, end_seconds)
 
         # 5a. List available files for the given day and radar station
@@ -97,12 +96,11 @@ def main_process(debug = False, debug_idx = None):
             # spinner_down.start()
             downloaded_files = download.main_download_proccess(year, month, day, radar_code, start_time, end_time, download.compressed_dir, download.uncompressed_dir)
             # spinner_down.stop()
-            print(f"Data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} downloaded successfully!\n")
+            print(f"Data for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} downloaded successfully!")
             # spinner_vis.start()
 
             # 5d. Visualize each downloaded file
             for file_path in downloaded_files:
-                print(f"Tornado Location: {row['slat']}, {row['slon']}")
                 visualize.visualize_radar_data(file_path, visualize.image_directory, row['slat'], row['slon'], debug)
                 # spinner_vis.stop()
                 print(f"Visualization for {radar_code} on {year}-{month:02}-{day:02} {hour:02}:{minute:02}:{seconds:02} created successfully!\n")
