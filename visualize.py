@@ -54,7 +54,7 @@ def visualize_radar_data(filename, image_directory, tornado_lat, tornado_lon, de
         vel_image_name = f"{base_filename}_velocity.png"
 
         fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.PlateCarree()})
-        vmin, vmax = -30, 30
+        vmin, vmax = -60, 60
 
         cax = ax.pcolormesh(actual_lons, actual_lats, data, vmin=vmin, vmax=vmax, cmap=pyart.graph.cm.NWSVel)
 
