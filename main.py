@@ -14,6 +14,35 @@ def delete_file(file_path):
         if e.errno != 2:
             raise
 
+def recover_process():
+    uncompressed_files_dir = download.uncompressed_dir  # Make sure this points to your uncompressed files directory
+    uncompressed_files = os.listdir(uncompressed_files_dir)
+
+    if not uncompressed_files:
+        print("The uncompressed_files directory is empty.")
+        return
+
+    for file_name in tqdm(uncompressed_files, desc="Recovering visualizations"):
+        file_path = os.path.join(uncompressed_files_dir, file_name)
+        try:
+            # Extract metadata from file name or path if necessary
+            # Assuming file name contains necessary metadata for visualization
+            # Example: 'radar_KTLX_20200520_1345.png'
+            # You might need to adjust parsing according to your file naming convention
+            parts = file_name.split('_')
+            radar_code = parts[1]
+            year, month, day = int(parts[2][:4]), int(parts[2][4:6]), int(parts[2][6:8])
+            hour, minute = int(parts[3][:2]), int(parts[3][2:4])
+
+            # Dummy values for slat and slon, replace with actual values extracted from file name if available
+            slat, slon = 0, 0
+
+            visualize.visualize_radar_data(file_path, visualize.image_directory, slat, slon, debug=False)
+            print(f"Visualization recovered for {file_name} successfully!")
+            delete_file(file_path)
+        except Exception as e:
+            print(f"Error recovering visualization for {file_name}. Error: {e}")
+
 def main_process(debug = False, debug_idx = None):
     # 1. Cleanup and Prepare enriched_tornado_data.csv
     cleanup.cleanup_tornado_data()
@@ -47,6 +76,8 @@ def main_process(debug = False, debug_idx = None):
 
         if sampling_choice == 'y':
             enriched_df = enriched_df.sample(sample_size)
+
+        enriched_df = enriched_df.iloc[:sample_size]
 
     # 5. Download, decompress, and visualize each tornado radar data
     downloaded_files_info = []
