@@ -80,7 +80,7 @@ def download_selected_files(files, bucket_name, compressed_dir, uncompressed_dir
                 with gzip.open(compressed_path, 'rb') as f_in:
                     with open(uncompressed_path, 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                os.remove(compressed_path)  # Remove the gz file after decompressing
+                #os.remove(compressed_path)  # Remove the gz file after decompressing
                 downloaded_files_list.append(uncompressed_path)
             else:
                 # If not a gzip, simply move it to the uncompressed_dir
