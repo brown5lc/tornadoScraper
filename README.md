@@ -43,7 +43,7 @@ If `debug_mode` is enabled in the program, you'll receive detailed logs and more
 
 ## Contributing
 
-If you'd like to contribute to the project, please follow the standard fork & pull request process. If you have any specific guidelines or steps you'd like contributors to follow, add them here.
+If you'd like to contribute to the project, please follow the standard fork & pull request process.
 
 ## License
 
