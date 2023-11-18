@@ -11,6 +11,10 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
+import cartopy.crs as ccrs
+from cartopy.feature import NaturalEarthFeature
+import numpy as np
+from PIL import Image
 
 backup = sys.stdout
 sys.stdout = open(os.devnull, 'w')
@@ -81,33 +85,83 @@ def download_and_decompress(filename):
 
 
 # Visualizing the radar data
-def visualize_radar_data(filename, user_lat, user_lon):
+def visualize_radar_data(weather_data, lat, lon):
 
-    # Read in the file
-    radar = pyart.io.read_nexrad_archive(filename)
+    # Read the radar data
+    radar = pyart.io.read_nexrad_archive(weather_data)
 
-    # Create a plot
-    display = pyart.graph.RadarDisplay(radar)
+    if 'velocity' not in radar.fields:
+        print(f"Error processing {weather_data}. Velocity data is missing.")
+        return
 
-    # Set up the figure
-    fig = plt.figure(figsize=(10, 10))
+    # Extracting the data for velocity
+    sweep = 3  # Adjust the sweep index as needed
+    data = radar.get_field(sweep, 'velocity')
+    x, y, _ = radar.get_gate_x_y_z(sweep)
+    x /= 1000.0  # Convert to km
+    y /= 1000.0  # Convert to km
 
-    # Plot reflectivity
-    ax = fig.add_subplot(221)
-    display.plot('reflectivity', 0, ax=ax, title='Reflectivity', colorbar_label='', vmin=-32, vmax=64)
-    display.plot_range_ring(radar.range['data'][-1]/1000., ax=ax)
-    display.set_limits(xlim=(-150, 150), ylim=(-150, 150), ax=ax)
+    # Convert Cartesian x and y to latitudes and longitudes
+    lon_offset = x / (111.0 * np.cos(np.radians(radar.latitude['data'][0])))
+    lat_offset = y / 111.0
+    actual_lons = radar.longitude['data'][0] + lon_offset
+    actual_lats = radar.latitude['data'][0] + lat_offset
 
-    # Plot velocity
-    ax = fig.add_subplot(222)
-    display.plot('velocity', 0, ax=ax, title='Velocity', colorbar_label='', vmin=-32, vmax=32)
-    display.plot_range_ring(radar.range['data'][-1]/1000., ax=ax)
-    display.set_limits(xlim=(-150, 150), ylim=(-150, 150), ax=ax)
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.PlateCarree()})
+    ax.pcolormesh(actual_lons, actual_lats, data, vmin=-60, vmax=60, cmap=pyart.graph.cm.NWSVel)
 
-    # Show the plot
-    plt.show()
+    # Setting the plot extent
+    buffer_in_degrees = 30.0 / 69.0  # 30 miles to degrees
+    ax.set_xlim([lon - buffer_in_degrees, lon + buffer_in_degrees])
+    ax.set_ylim([lat - buffer_in_degrees, lat + buffer_in_degrees])
 
-    return
+    ax.axis('off')
+
+    # Save the velocity plot to a BytesIO object
+    velocity_img = io.BytesIO()
+    plt.savefig(velocity_img, format='png', bbox_inches='tight', pad_inches=0)
+    velocity_img.seek(0)  # Go back to the beginning of the BytesIO object
+    plt.close(fig)
+
+     # ------ Reflectivity Plot ------
+    sweep_reflectivity = 0  # Adjust the sweep index as needed for reflectivity
+    data_reflectivity = radar.get_field(sweep_reflectivity, 'reflectivity')
+    x_reflectivity, y_reflectivity, _ = radar.get_gate_x_y_z(sweep_reflectivity)
+    x_reflectivity /= 1000.0  # Convert to km
+    y_reflectivity /= 1000.0  # Convert to km
+
+    # Convert Cartesian x and y to latitudes and longitudes for reflectivity
+    lon_offset_reflectivity = x_reflectivity / (111.0 * np.cos(np.radians(radar.latitude['data'][0])))
+    lat_offset_reflectivity = y_reflectivity / 111.0
+    actual_lons_reflectivity = radar.longitude['data'][0] + lon_offset_reflectivity
+    actual_lats_reflectivity = radar.latitude['data'][0] + lat_offset_reflectivity
+
+    # Create the reflectivity plot
+    fig2, ax2 = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.PlateCarree()})
+    ax2.pcolormesh(actual_lons_reflectivity, actual_lats_reflectivity, data_reflectivity, vmin=-32, vmax=64, cmap=pyart.graph.cm.NWSRef)
+
+    # Setting the plot extent similar to the first plot
+    ax2.set_xlim([lon - buffer_in_degrees, lon + buffer_in_degrees])
+    ax2.set_ylim([lat - buffer_in_degrees, lat + buffer_in_degrees])
+
+    # Adding state lines
+    states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='none', name='admin_1_states_provinces_lines')
+    ax2.add_feature(states, edgecolor='black')
+
+    # Remove axis, gridlines, coastlines, and frame for reflectivity plot
+    ax2.axis('off')
+    ax2.gridlines(draw_labels=False)
+    ax2.coastlines('10m', linewidth=0.8)
+    ax2.set_frame_on(False)
+
+    # Save the reflectivity plot to a BytesIO object
+    reflectivity_img = io.BytesIO()
+    plt.savefig(reflectivity_img, format='png', bbox_inches='tight', pad_inches=0)
+    reflectivity_img.seek(0)  # Go back to the beginning of the BytesIO object
+    plt.close(fig2)
+
+    return velocity_img, reflectivity_img
 
 # Completing the main function
 def main(lat, lon):
@@ -126,7 +180,21 @@ def main(lat, lon):
     decompressed_data = download_and_decompress(filename)
 
     # Visualize the radar file
-    visualize_radar_data(decompressed_data, lat, lon)
+    velocity_img, reflectivity_img = visualize_radar_data(decompressed_data, lat, lon)
+
+    # Display the velocity plot
+    with Image.open(velocity_img) as img:
+        resized_velocity_img = img.resize((224, 224))
+
+        resized_velocity_io = io.BytesIO()
+        resized_velocity_img.save(resized_velocity_io, format='png')
+        resized_velocity_io.seek(0)
+
+        resized_velocity_img.show()
+
+    # Display the reflectivity plot
+    with Image.open(reflectivity_img) as img:
+        img.show()
  
     return 
 """
