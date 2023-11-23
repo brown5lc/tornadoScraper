@@ -3,7 +3,6 @@ import os
 import io
 import sys
 import gzip
-import shutil
 import boto3
 from botocore import UNSIGNED
 from botocore.client import Config
