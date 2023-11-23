@@ -1,6 +1,6 @@
 # tornadoScraper
 
-`tornadoScraper` is a program designed to gather substantial amounts of Doppler radar velocity data, particularly during tornadic events. The primary purpose is to visualize this data, which will later be used for training a Convolutional Neural Network (CNN) in another project.
+`tornadoScraper` is a program designed to gather substantial amounts of Doppler radar velocity data, particularly during tornadic events. The primary purpose is to visualize this data, which will later be used for training a Convolutional Neural Network in another project.
 
 ## Prerequisites
 
