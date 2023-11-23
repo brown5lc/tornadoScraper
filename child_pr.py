@@ -14,6 +14,8 @@ import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
 import numpy as np
 from PIL import Image
+import argparse
+import base64
 
 backup = sys.stdout
 sys.stdout = open(os.devnull, 'w')
@@ -22,9 +24,6 @@ sys.stdout = backup
 
 # Constants
 bucket_name = 'noaa-nexrad-level2'
-compressed_dir = "./compressed_files"
-uncompressed_dir = "./uncompressed_files"
-image_directory = "./radar_images"
 
 radar_df = pd.read_csv('radar_locations.csv')
 radar_points = list(zip(radar_df['Latitude'], radar_df['Longitude']))
@@ -162,7 +161,9 @@ def visualize_radar_data(weather_data, lat, lon):
 
     return velocity_img, reflectivity_img
 
-# Completing the main function
+def encode_image(image_buffer):
+    return base64.b64encode(image_buffer.getvalue()).decode('utf-8')
+
 def main(lat, lon):
     # Take the users latitude and longitude and find the nearest radar
     radar_site = find_nearest_radar_site(lat, lon)
@@ -189,20 +190,17 @@ def main(lat, lon):
         resized_velocity_img.save(resized_velocity_io, format='png')
         resized_velocity_io.seek(0)
 
-        resized_velocity_img.show()
+    encoded_velocity_img = encode_image(resized_velocity_io)
+    encoded_reflectivity_img = encode_image(reflectivity_img)
 
-    # Display the reflectivity plot
-    with Image.open(reflectivity_img) as img:
-        img.show()
- 
-    return 
-"""
+    return encoded_velocity_img, encoded_reflectivity_img
+
 if __name__ == "__main__":
     # Example latitude and longitude
-    lat = 35.0
-    lon = -97.0
+    parser = argparse.ArgumentParser(description='Get latitude and longitude')
+    parser.add_argument('lat', type=float, help='Latitude')
+    parser.add_argument('lon', type=float, help='Longitude')
 
-    main(lat, lon)
-"""
+    args = parser.parse_args()
 
-main(39.176252, -84.483565)
+    main(args.lat, args.lon)
